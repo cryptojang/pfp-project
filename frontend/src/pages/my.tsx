@@ -4,6 +4,7 @@ import { useOutletContext } from "react-router-dom";
 import MintModal from "../components/MintModal";
 import { NftMetadata, OutletContext } from "../types";
 import axios from "axios";
+import MyNFTCard from "../components/MyNFTCard";
 
 const My: FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -38,7 +39,7 @@ const My: FC = () => {
 
         const response = await axios.get(metadataURI);
 
-        temp.push(response.data);
+        temp.push({ ...response.data, tokenId: Number(tokenId) }); // 원래 tokenId로 이름 같아서 줄일 수 있는데, 형변환 해야 하므로 .
       }
 
       setMetadataArray(temp);
@@ -67,10 +68,12 @@ const My: FC = () => {
         </div>
         <ul className=" p-8 grid grid-cols-2 gap-8">
           {metadataArray?.map((v, i) => (
-            <li key={i}>
-              <img src={v.image} alt={v.name} />
-              <div className="font-semibold mt-1">{v.name}</div>
-            </li>
+            <MyNFTCard
+              key={i}
+              image={v.image}
+              name={v.name}
+              tokenId={v.tokenId!} // undefined 에러 처리 위해 ! 붙여줌
+            />
           ))}
         </ul>
       </div>
