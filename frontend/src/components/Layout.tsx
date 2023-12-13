@@ -6,12 +6,6 @@ import { useSDK } from "@metamask/sdk-react";
 import Header from "./Header";
 import minNftAbi from "../abis/mintNftAbi.json";
 
-export interface OutletContext {
-  account: string;
-  web3: Web3;
-  mintNftContract: Contract<ContractAbi>;
-}
-
 const Layout: FC = () => {
   const [account, setAccount] = useState<string>("");
   const [web3, setWeb3] = useState<Web3>();
