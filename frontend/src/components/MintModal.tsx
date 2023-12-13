@@ -8,16 +8,25 @@ import { link } from "fs";
 
 interface MintModalProps {
   setIsOpen: Dispatch<SetStateAction<boolean>>;
+  metadataArray: NftMetadata[];
+  setMetadataArray: Dispatch<SetStateAction<NftMetadata[]>>;
 }
 
-const MintModal: FC<MintModalProps> = ({ setIsOpen }) => {
+const MintModal: FC<MintModalProps> = ({
+  setIsOpen,
+  setMetadataArray,
+  metadataArray,
+}) => {
   const [metadata, setMetadata] = useState<NftMetadata>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { mintNftContract, account } = useOutletContext<OutletContext>(); //context로 만들어서 my props 말고 바로 내려줄 수 잇음
 
   const onClickMint = async () => {
     try {
       if (!mintNftContract || !account) return;
+
+      setIsLoading(true);
 
       await mintNftContract.methods.mintNFT().send({ from: account });
 
@@ -37,8 +46,12 @@ const MintModal: FC<MintModalProps> = ({ setIsOpen }) => {
       const response = await axios.get(metadataURI);
 
       setMetadata(response.data);
+      setMetadataArray([response.data, ...metadataArray]);
+      setIsLoading(false);
     } catch (error) {
       console.log(error);
+
+      setIsLoading(false);
     }
   };
 
@@ -72,7 +85,7 @@ const MintModal: FC<MintModalProps> = ({ setIsOpen }) => {
           </div>
         ) : (
           <>
-            <div>이 NFT를 민팅하시겠습니까?</div>
+            <div>{isLoading ? "로딩 중..." : "NFT를 민팅하시겠습니까?"}</div>
             <div className="bg-blue-100 text-center mt-4 ">
               <button className="hover:text-gray-500" onClick={onClickMint}>
                 확인
