@@ -5,10 +5,12 @@ import MintModal from "../components/MintModal";
 import { NftMetadata, OutletContext } from "../types";
 import axios from "axios";
 import MyNFTCard from "../components/MyNftCard";
+import { SALE_NFT_CONTRACT } from "../abis/contractAddress";
 
 const My: FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [metadataArray, setMetadataArray] = useState<NftMetadata[]>([]);
+  const [saleStatus, setSaleStatus] = useState<boolean>(false);
 
   const { mintNftContract, account } = useOutletContext<OutletContext>();
 
@@ -49,6 +51,33 @@ const My: FC = () => {
       console.log(error);
     }
   };
+
+  const getSaleStatus = async () => {
+    try {
+      const isApproved: boolean = await mintNftContract.methods
+        //@ts-expect-error
+        .isApprovedForAll(account, SALE_NFT_CONTRACT)
+        .call();
+
+      setSaleStatus(isApproved);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onClickSaleStatus = async () => {
+    try {
+      const response = await mintNftContract.methods
+        //@ts-expect-error
+        .setApprovalForAll(SALE_NFT_CONTRACT, !saleStatus)
+        .send({ from: account });
+
+      setSaleStatus(!saleStatus);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     getMyNFTs();
   }, [mintNftContract, account]);
@@ -59,10 +88,18 @@ const My: FC = () => {
     navigate("/");
   }, [account]);
 
+  useEffect(() => {
+    if (!account) return;
+    getSaleStatus();
+  }, [account]);
+
   return (
     <>
       <div className=" grow">
-        <div className=" text-right p-2">
+        <div className=" flex justify-between p-2">
+          <button onClick={onClickSaleStatus} className="hover:text-gray-500">
+            Sale Approved: {saleStatus ? "TRUE" : "FALSE"}
+          </button>
           <button className="hover:text-gray-500" onClick={onClickMintModal}>
             Mint
           </button>
@@ -76,7 +113,8 @@ const My: FC = () => {
               key={i}
               image={v.image}
               name={v.name}
-              tokenId={v.tokenId!} // undefined 에러 처리 위해 ! 붙여줌
+              tokenId={v.tokenId!}
+              saleStatus={saleStatus} // undefined 에러 처리 위해 ! 붙여줌
             />
           ))}
         </ul>

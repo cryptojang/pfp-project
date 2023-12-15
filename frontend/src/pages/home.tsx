@@ -57,7 +57,7 @@ const Home: FC = () => {
 
           const response = await axios.get(metadataURI);
 
-          temp.push({ ...response.data, tokenId: searchTokenId }); // 원래 tokenId로 이름 같아서 줄일 수 있는데, 형변환 해야 하므로 .
+          temp.push({ ...response.data, tokenId: searchTokenId - i }); // 원래 tokenId로 이름 같아서 줄일 수 있는데, 형변환 해야 하므로 .
         }
       }
 
